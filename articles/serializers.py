@@ -2,9 +2,10 @@ from rest_framework import serializers
 from users.models import Article, UserAccount
 
 class ArticleSerializer(serializers.ModelSerializer):
+    article_image = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     class Meta:
         model = Article
-        fields = ['id', 'user','title', 'text', 'rating', 'date']
+        fields = ['id', 'user','title', 'text', 'rating', 'date', 'article_image']
         # read_only_fields = ['user', 'date']
         
     # def create(self, validated_data):

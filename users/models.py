@@ -58,6 +58,7 @@ class Article(models.Model):
     text = models.TextField()
     rating = models.FloatField(default=0)
     date = models.DateField(auto_now_add=True)
+    article_image = models.ImageField(upload_to='articles/images', null=True, blank=True)
 
     def __str__(self):
         return f"Article by {self.user.email} - {self.date}"
