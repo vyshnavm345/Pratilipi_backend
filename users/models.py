@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
-
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg
 
 class UserAccoountManager(BaseUserManager):
     def create_user(self, first_name, last_name, email, password=None):
@@ -56,18 +57,23 @@ class Article(models.Model):
     user = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     text = models.TextField()
-    rating = models.FloatField(default=0)
     date = models.DateField(auto_now_add=True)
     article_image = models.ImageField(upload_to='articles/images', null=True, blank=True)
 
-    def __str__(self):
-        return f"Article by {self.user.email} - {self.date}"
+    @property
+    def rating(self):
+        average_rating = self.comment_set.aggregate(Avg('rating'))['rating__avg']
+        return round(average_rating, 1) if average_rating is not None else 0
 
+    def __str__(self):
+        return f"Article by {self.user.email} - {self.date}- {self.rating}"
+    
 class Comment(models.Model):
     user = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
+    rating = models.FloatField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)]) 
 
     def __str__(self):
         return f"Comment by {self.user.email} on {self.article}"
